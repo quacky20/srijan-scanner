@@ -32,6 +32,14 @@ function App() {
     }
   }, [])
 
+  const decode = (str) => {
+    let shifted = "";
+    for (let i = 0; i < str.length; i++) {
+      shifted += String.fromCharCode(str.charCodeAt(i) + 3);
+    }
+    return btoa(shifted);
+  }
+
   const onScanSuccess = async (decodedText, decodedResult) => {
     setScanResult(decodedText)
     setSelectedAction(null)
@@ -48,10 +56,10 @@ function App() {
     try {
       setIsScanning(true)
       setStatus('Sending to backend...')
-      
+
       // Convert scanned data to base64
-      const base64Data = btoa(scanResult)
-      
+      const base64Data = decode(scanResult)
+
       const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         headers: {
@@ -72,7 +80,7 @@ function App() {
       } else {
         const errorData = await response.json().catch(() => ({}))
         const errorMessage = errorData.message || response.statusText
-        
+
         if (endpoint.includes('entry')) {
           setStatus(`✗ Entry Error: ${errorMessage} (User may have already entered)`)
         } else {
@@ -129,7 +137,7 @@ function App() {
                   Base64 Encoded:
                 </h3>
                 <p className="text-gray-700 break-all font-mono text-sm">
-                  {btoa(scanResult)}
+                  {decode(scanResult)}
                 </p>
               </div>
 
@@ -138,34 +146,31 @@ function App() {
                 <button
                   onClick={handleEntry}
                   disabled={isScanning || selectedAction === 'entry'}
-                  className={`py-4 px-6 rounded-lg font-semibold transition-colors ${
-                    selectedAction === 'entry'
+                  className={`py-4 px-6 rounded-lg font-semibold transition-colors ${selectedAction === 'entry'
                       ? 'bg-green-600 text-white cursor-not-allowed'
                       : 'bg-green-600 hover:bg-green-700 text-white'
-                  } disabled:opacity-50`}
+                    } disabled:opacity-50`}
                 >
                   {selectedAction === 'entry' ? '✓ Entry Recorded' : '🚪 Allow Entry'}
                 </button>
-                
+
                 <button
                   onClick={handleExit}
                   disabled={isScanning || selectedAction === 'exit'}
-                  className={`py-4 px-6 rounded-lg font-semibold transition-colors ${
-                    selectedAction === 'exit'
+                  className={`py-4 px-6 rounded-lg font-semibold transition-colors ${selectedAction === 'exit'
                       ? 'bg-orange-600 text-white cursor-not-allowed'
                       : 'bg-orange-600 hover:bg-orange-700 text-white'
-                  } disabled:opacity-50`}
+                    } disabled:opacity-50`}
                 >
                   {selectedAction === 'exit' ? '✓ Exit Recorded' : '🚶 Record Exit'}
                 </button>
               </div>
 
               {status && (
-                <div className={`border rounded-lg p-4 ${
-                  status.includes('✓') 
-                    ? 'bg-green-50 border-green-200 text-green-800' 
+                <div className={`border rounded-lg p-4 ${status.includes('✓')
+                    ? 'bg-green-50 border-green-200 text-green-800'
                     : 'bg-red-50 border-red-200 text-red-800'
-                }`}>
+                  }`}>
                   <p className="font-semibold">{status}</p>
                 </div>
               )}
